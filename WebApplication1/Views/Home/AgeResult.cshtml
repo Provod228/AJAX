@@ -1,0 +1,39 @@
+﻿@model AgeResultModel
+
+@{
+    ViewData["Title"] = "Результат";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow border-success">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Результат расчёта</h4>
+            </div>
+            <div class="card-body text-center">
+                <h3>Привет, <strong>@Model.UserName</strong>!</h3>
+
+                <p class="display-4 my-4 text-success">
+                    @Model.Age лет
+                </p>
+
+                @if (Model.IsAdualt)
+                {
+                    <div class="alert alert-success">
+                        Вы совершеннолетний
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        Вы несовершеннолетний
+                    </div>
+                }
+
+                <a asp-action="Index" class="btn btn-outline-primary mt-3">
+                    Вернуться к форме
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
