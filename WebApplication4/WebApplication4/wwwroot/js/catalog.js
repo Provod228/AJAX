@@ -42,15 +42,15 @@
 
     async function load(category) {
         clearError();
-        root.innerHTML = <p class="text-muted">${root.dataset.loadingText}</p>;
+        root.innerHTML = `<p class="text-muted">${root.dataset.loadingText}</p>`;
 
         const url = category
-            ? ${endpoint}?category=${encodeURIComponent(category)}
+            ? `${endpoint}?category=${encodeURIComponent(category)}`
             : endpoint;
 
         try {
             const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-            if (!res.ok) throw new Error(HTTP ${res.status});
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);                    // ← backticks
             render(await res.json());
         } catch (err) {
             console.error(err);
@@ -70,10 +70,10 @@
 
         const id = btn.dataset.id;
         try {
-            const res = await fetch(${endpoint}/${id});
-            if (!res.ok) throw new Error(HTTP ${res.status});
+            const res = await fetch(`${endpoint}/${id}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const p = await res.json();
-            alert(${p.name}\nКатегория: ${p.category}\nЦена: ${p.price} ₽);
+            alert(`${p.name}\nКатегория: ${p.category}\nЦена: ${p.price} ₽`);
         } catch (err) {
             showError('Не удалось загрузить товар: ' + err.message);
         }

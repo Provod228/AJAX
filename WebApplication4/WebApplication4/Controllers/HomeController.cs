@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApplication4.Services;
 using WebApplication4.ViewModels;
-using WebApplication4.Services;
-using WebApplication4.ViewModels;
 
-namespace ShopShell.Controllers;
+namespace WebApplication4.Controllers;
 
 public class HomeController : Controller
 {

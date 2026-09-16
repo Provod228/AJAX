@@ -3,10 +3,8 @@ using WebApplication4.Services;
 using WebApplication4.ViewModels;
 using WebApplication4.Models;
 using System.Reflection;
-using WebApplication4.Services;
-using ShopShell.ViewModels;
 
-namespace ShopShell.Controllers;
+namespace WebApplication4.Controllers;
 
 [Route("api/products")]
 public class ProductsController : Controller
