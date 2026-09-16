@@ -1,13 +1,43 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebApplication4.Services;
+using WebApplication4.ViewModels;
+using WebApplication4.Models;
+using System.Reflection;
+using WebApplication4.Services;
+using ShopShell.ViewModels;
 
-[ApiController]
-[Route("api/[controller]")]
-public class ProductsController : ControllerBase
+namespace ShopShell.Controllers;
+
+[Route("api/products")]
+public class ProductsController : Controller
 {
-    [HttpGet]
-    public IActionResult GetAll() =>
-        Ok(new[] {
-            new { Id = 1, Name = "Товар A", Price = 100 },
-            new { Id = 2, Name = "Товар B", Price = 200 }
-        });
+    private readonly IProductRepository _repo;
+
+    public ProductsController(IProductRepository repo) => _repo = repo;
+
+    // GET /api/products?category=Мебель
+    [HttpGet("")]
+    public async Task<IActionResult> List([FromQuery] string? category, CancellationToken ct)
+    {
+        var items = string.IsNullOrWhiteSpace(category)
+            ? await _repo.GetAllAsync(ct)
+            : await _repo.GetByCategoryAsync(category, ct);
+
+        var dtos = items.Select(ToDto);
+        return Json(dtos);          // ← ключевое отличие от UI-экшена
+    }
+
+    // GET /api/products/3
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Details(int id, CancellationToken ct)
+    {
+        var product = await _repo.GetByIdAsync(id, ct);
+        if (product is null)
+            return NotFound(new { error = "Product not found", id });
+
+        return Json(ToDto(product));
+    }
+
+    private static ProductDto ToDto(Product p)
+        => new(p.Id, p.Name, p.Price, p.Category);
 }
