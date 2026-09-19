@@ -1,0 +1,52 @@
+[LIFECYCLE 1/6] CreateBuilder: хост создан, конфигурация загружена
+[LIFECYCLE 2/6] ConfigureServices: сервисы зарегистрированы
+[LIFECYCLE 3/6] Build: WebApplication собран
+[ENV] Environment: Development
+[LIFECYCLE 4/6] Configure: строим middleware-конвейер
+==================================================
+[HOST] >>> Приложение СТАРТУЕТ (IHostedService.StartAsync)
+[HOST] Жизненный цикл: CreateBuilder -> Services -> Build -> Pipeline -> Run
+==================================================
+[LIFECYCLE 5/6] Endpoints зарегистрированы (/, /submit, /health, /lifecycle)
+[LIFECYCLE 6/6] Run: сервер запускается. Откройте http://localhost:5076
+--------------------------------------------------
+ДЛЯ СКРИНОВ ДЗ:
+  1. Форма:            http://localhost:5076/
+  2. Схема lifecycle:  http://localhost:5076/lifecycle.html
+  3. Health-check:     http://localhost:5076/health
+--------------------------------------------------
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5076
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+
+--- GET / (форма) ---
+[1-LOG] >>> ВХОД: GET /index.html в 12:00:01.100
+[2-TIME] Таймер запущен
+[INLINE] GET /index.html проходит inline-middleware
+[INLINE] GET /index.html возвращается обратно
+[2-TIME] Запрос /index.html выполнен за 4 мс
+[1-LOG] <<< ВЫХОД: /index.html -> 200 за 6.2 мс
+
+--- POST /submit (валидная форма) ---
+[1-LOG] >>> ВХОД: POST /submit в 12:00:20.300
+[2-TIME] Таймер запущен
+[3-FORM] >>> Перехвачена отправка формы /submit
+[3-FORM] Данные: name='Иван', email='ivan@example.com', message_len=28
+[3-FORM] Валидация пройдена — передаём дальше по конвейеру
+[4-HEAD:pre-endpoint] проход 'pre-endpoint'
+[INLINE] POST /submit проходит inline-middleware
+[ENDPOINT] >>> POST /submit ДОШЁЛ до endpoint (валидация пройдена)
+[INLINE] POST /submit возвращается обратно
+[2-TIME] Запрос /submit выполнен за 9 мс
+[1-LOG] <<< ВЫХОД: /submit -> 200 за 11.4 мс
+
+--- POST /submit (НЕвалидная форма: пустое имя, email без @) ---
+[1-LOG] >>> ВХОД: POST /submit в 12:01:05.700
+[2-TIME] Таймер запущен
+[3-FORM] >>> Перехвачена отправка формы /submit
+[3-FORM] Данные: name='', email='bad-mail', message_len=2
+[3-FORM] !!! Валидация НЕ пройдена — короткое замыкание конвейера
+[2-TIME] Запрос /submit выполнен за 2 мс
+[1-LOG] <<< ВЫХОД: /submit -> 400 за 3.1 мс
+(обратите внимание: строк [ENDPOINT] и [4-HEAD] НЕТ — конвейер остановлен)

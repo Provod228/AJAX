@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>midalware — Форма + Middleware</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="card">
+    <div class="badge">Пустой шаблон ASP.NET Core · Middleware Demo</div>
+    <h1>📨 Форма обратной связи</h1>
+    <p class="hint">
+      Эта форма отправляется на <code>POST /submit</code> и проходит через конвейер:
+      <b>Logging → Timing → FormValidation → Endpoint</b>.
+      Невалидные данные middleware <b>отклонит сам</b> (short-circuit),
+      валидные — дойдут до endpoint.
+    </p>
+
+    <!-- Форма привязана к middleware FormValidationMiddleware (POST /submit) -->
+    <form method="post" action="/submit">
+      <label>
+        Имя (мин. 2 символа)
+        <input type="text" name="name" placeholder="Иван" required minlength="2">
+      </label>
+      <label>
+        E-mail (должен содержать @)
+        <input type="email" name="email" placeholder="ivan@example.com" required>
+      </label>
+      <label>
+        Сообщение (мин. 5 символов)
+        <textarea name="message" rows="4" placeholder="Привет! Это тестовое сообщение." required minlength="5"></textarea>
+      </label>
+      <button type="submit">Отправить через конвейер →</button>
+    </form>
+
+    <div class="tests">
+      <h3>Что показать преподавателю:</h3>
+      <ol>
+        <li>Отправьте <b>пустую/невалидную</b> форму → ответ 400 от <code>FormValidationMiddleware</code>.</li>
+        <li>Отправьте <b>валидную</b> форму → страница успеха от endpoint <code>POST /submit</code>.</li>
+        <li>Откройте F12 → Network → проверьте заголовки <code>X-Logged-By</code>, <code>X-Response-Time-ms</code>, <code>X-Lifecycle-Stage</code>.</li>
+        <li>Посмотрите консоль сервера — там весь жизненный цикл по шагам.</li>
+      </ol>
+    </div>
+
+    <div class="links">
+      <a class="btn secondary" href="/lifecycle.html">📊 Схема жизненного цикла</a>
+      <a class="btn secondary" href="/health" target="_blank">💚 /health (JSON)</a>
+    </div>
+  </div>
+  <footer>midalware · Empty template (dotnet new web) · .NET 8</footer>
+</body>
+</html>

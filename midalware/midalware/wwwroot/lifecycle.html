@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Жизненный цикл приложения — midalware</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="card wide">
+    <div class="badge">Скрин №2 · Жизненный цикл</div>
+    <h1>🔄 Жизненный цикл приложения</h1>
+    <p class="hint">Эту страницу можно приложить скрином к ДЗ. Ниже — все 6 этапов + цикл запроса.</p>
+
+    <h2>А. Жизненный цикл приложения (хоста)</h2>
+    <div class="steps">
+      <div class="step"><span>1</span><div><b>CreateBuilder</b><p>WebApplication.CreateBuilder: конфиг, логирование, DI-контейнер. Пустой шаблон.</p></div></div>
+      <div class="step"><span>2</span><div><b>ConfigureServices</b><p>builder.Services: AddHostedService, AddDirectoryBrowser…</p></div></div>
+      <div class="step"><span>3</span><div><b>Build</b><p>builder.Build() — финализация DI, создание WebApplication.</p></div></div>
+      <div class="step"><span>4</span><div><b>Configure Pipeline</b><p>app.Use… — сборка конвейера middleware. Порядок важен!</p></div></div>
+      <div class="step"><span>5</span><div><b>Endpoints</b><p>app.MapGet/MapPost — терминальные точки, формируют ответ.</p></div></div>
+      <div class="step"><span>6</span><div><b>Run / Stop</b><p>app.Run() → StartAsync; Ctrl+C → StopAsync. Kestrel слушает порт.</p></div></div>
+    </div>
+
+    <h2>Б. Жизненный цикл запроса (наш конвейер)</h2>
+    <pre class="schema">Request (POST /submit, форма)
+   │
+   ▼
+┌─────────────────────────┐
+│ 1. RequestLoggingMiddleware │  лог входа → ... → лог выхода, заголовок X-Logged-By
+└────────────┬────────────┘
+             ▼
+┌─────────────────────────┐
+│ 2. RequestTimingMiddleware  │  Stopwatch, заголовок X-Response-Time-ms
+└────────────┬────────────┘
+             ▼
+┌─────────────────────────┐
+│ 3. FormValidationMiddleware │  ПРИВЯЗАН К ФОРМЕ:
+│                         │  валидно? → Items + next → endpoint
+│                         │  НЕ валидно? → 400 + short-circuit (endpoint НЕ вызывается)
+└────────────┬────────────┘
+             ▼
+┌─────────────────────────┐
+│ 4. LifecycleHeadersMiddleware│ заголовки X-Lifecycle-Stage, X-App
+└────────────┬────────────┘
+             ▼
+┌─────────────────────────┐
+│ 5. Endpoint POST /submit    │  формирует HTML-ответ (терминальный)
+└────────────┬────────────┘
+             ▼
+        Response ──► обратно вверх по цепочке ──► браузер</pre>
+
+    <h2>В. Short-circuit (короткое замыкание)</h2>
+    <p>Если <code>FormValidationMiddleware</code> находит ошибки — он <b>не вызывает _next</b>,
+    а сам пишет ответ 400. Endpoint не выполняется. Это ключевое понятие жизненного цикла запроса.</p>
+
+    <div class="links">
+      <a class="btn" href="/">← К форме</a>
+      <a class="btn secondary" href="/health" target="_blank">/health</a>
+    </div>
+  </div>
+  <footer>midalware · docs: LIFECYCLE.md</footer>
+</body>
+</html>
