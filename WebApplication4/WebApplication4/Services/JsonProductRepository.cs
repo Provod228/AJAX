@@ -8,6 +8,7 @@ public class JsonProductRepository : IProductRepository
 {
     private readonly string _filePath;
     private readonly JsonSerializerOptions _opts = new() { PropertyNameCaseInsensitive = true };
+    private readonly SemaphoreSlim _writeLock = new(1, 1);
 
     public JsonProductRepository(IWebHostEnvironment env)
     {
@@ -32,4 +33,75 @@ public class JsonProductRepository : IProductRepository
         => (await LoadAsync(ct))
             .Where(p => string.Equals(p.Category, category, StringComparison.OrdinalIgnoreCase))
             .ToList();
+
+    public async Task<Product> AddAsync(Product product, CancellationToken ct = default)
+    {
+        await _writeLock.WaitAsync(ct);
+        try
+        {
+            var items = await LoadAsync(ct);
+            product.Id = items.Count == 0 ? 1 : items.Max(p => p.Id) + 1;
+            items.Add(product);
+            await SaveAsync(items, ct);
+            return product;
+        }
+        finally
+        {
+            _writeLock.Release();
+        }
+    }
+
+    private async Task SaveAsync(List<Product> items, CancellationToken ct)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(_filePath)!);
+        await using var stream = File.Create(_filePath);
+        await JsonSerializer.SerializeAsync(
+            stream, items, new JsonSerializerOptions { WriteIndented = true }, ct);
+    }
+
+    public async Task<Product?> UpdateAsync(Product product, CancellationToken ct = default)
+    {
+        await _writeLock.WaitAsync(ct);
+        try
+        {
+            var items = await LoadAsync(ct);
+            var existing = items.FirstOrDefault(p => p.Id == product.Id);
+            if (existing is null)
+                return null;
+
+            existing.Name = product.Name;
+            existing.Price = product.Price;
+            existing.Category = product.Category;
+            existing.Description = product.Description;
+            existing.Stock = product.Stock;
+            existing.Version++; // каждое изменение → новая версия → новый ETag
+
+            await SaveAsync(items, ct);
+            return existing;
+        }
+        finally
+        {
+            _writeLock.Release();
+        }
+    }
+
+    public async Task<bool> DeleteAsync(int id, CancellationToken ct = default)
+    {
+        await _writeLock.WaitAsync(ct);
+        try
+        {
+            var items = await LoadAsync(ct);
+            var existing = items.FirstOrDefault(p => p.Id == id);
+            if (existing is null)
+                return false; // уже удалён → 404, состояние то же (идемпотентность DELETE)
+
+            items.Remove(existing);
+            await SaveAsync(items, ct);
+            return true;
+        }
+        finally
+        {
+            _writeLock.Release();
+        }
+    }
 }

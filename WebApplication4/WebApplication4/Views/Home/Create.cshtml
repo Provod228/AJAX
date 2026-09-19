@@ -1,0 +1,56 @@
+@model WebApplication4.ViewModels.ProductCreateViewModel
+@{
+    ViewData["Title"] = "Добавить товар";
+}
+
+<div class="container">
+    <h1>Добавить товар</h1>
+    <p class="text-muted">После сохранения откроется страница этого товара.</p>
+
+    <form asp-action="Create" method="post" class="col-md-6">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Название</label>
+            <input asp-for="Name" class="form-control" placeholder="Например: Клавиатура" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Price" class="form-label">Цена (₽)</label>
+            <input asp-for="Price" class="form-control" type="number" step="0.01" min="0.01" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Category" class="form-label">Категория</label>
+            <input asp-for="Category" class="form-control" list="categories" placeholder="Например: Электроника" />
+            <datalist id="categories">
+                @foreach (var cat in Model.ExistingCategories)
+                {
+                    <option value="@cat"></option>
+                }
+            </datalist>
+            <span asp-validation-for="Category" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Описание</label>
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Stock" class="form-label">Остаток (шт.)</label>
+            <input asp-for="Stock" class="form-control" type="number" min="0" value="0" />
+            <span asp-validation-for="Stock" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,48 @@
+@model WebApplication4.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Каталог</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-body">
+            <h1 class="card-title">@Model.Name</h1>
+            <p>
+                <span class="badge bg-secondary">@Model.Category</span>
+                <span class="ms-2 fs-5">@Model.Price.ToString("N2") ₽</span>
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <p class="card-text">@Model.Description</p>
+            }
+            else
+            {
+                <p class="card-text text-muted">Описание отсутствует.</p>
+            }
+
+            <p class="card-text">
+                @if (Model.Stock > 0)
+                {
+                    <span class="text-success">В наличии: @Model.Stock шт.</span>
+                }
+                else
+                {
+                    <span class="text-danger">Нет в наличии</span>
+                }
+            </p>
+
+            <p class="text-muted small">Артикул: @Model.Id</p>
+
+            <a asp-action="Index" class="btn btn-secondary">← Назад к каталогу</a>
+            <a asp-action="Create" class="btn btn-outline-primary">Добавить товар</a>
+        </div>
+    </div>
+</div>

@@ -31,8 +31,8 @@
             node.querySelector('[data-field="category"]').textContent = p.category;
             node.querySelector('[data-field="price"]').textContent =
                 new Intl.NumberFormat('ru-RU').format(p.price);
-            const btn = node.querySelector('[data-field="details"]');
-            btn.dataset.id = p.id;
+            const link = node.querySelector('[data-field="details"]');
+            link.href = `/Home/Details/${p.id}`;
             frag.appendChild(node);
         });
 
@@ -61,22 +61,6 @@
     // Фильтры
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => load(btn.dataset.category || null));
-    });
-
-    // Кнопка "Подробнее" (делегирование)
-    root.addEventListener('click', async e => {
-        const btn = e.target.closest('.details-btn');
-        if (!btn) return;
-
-        const id = btn.dataset.id;
-        try {
-            const res = await fetch(`${endpoint}/${id}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const p = await res.json();
-            alert(`${p.name}\nКатегория: ${p.category}\nЦена: ${p.price} ₽`);
-        } catch (err) {
-            showError('Не удалось загрузить товар: ' + err.message);
-        }
     });
 
     load(null);
